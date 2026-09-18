@@ -1,0 +1,12 @@
+@host = http://localhost:5080
+GET {{host}}/api/info
+Accept: application/json
+
+### Liveness
+GET {{host}}/health
+
+### Database readiness
+GET {{host}}/health/ready
+
+### OpenAPI (Development only)
+GET {{host}}/openapi/v1.json

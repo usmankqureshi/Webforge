@@ -4,7 +4,7 @@ A modern, production-oriented **Content Management System (CMS)** built with **A
 
 Webforge is an independent engineering project designed to explore and demonstrate modern .NET development practices including **Clean Architecture, RESTful API design, role-based authorization, automated testing, containerization, asynchronous messaging, caching, CI/CD, and cloud deployment**.
 
-> **Project Status:** 🚧 Active Development
+> **Project Status:** 🚧 Foundation scaffolded; CMS features in development
 
 ---
 
@@ -505,55 +505,93 @@ The cloud implementation is intended to demonstrate practical deployment, config
 
 ## Getting Started
 
+The repository now includes a runnable foundation: a .NET 10 solution, Angular 21
+client, EF Core SQL Server context and initial migration, API health checks,
+OpenAPI, and xUnit tests. Authentication, content endpoints, publishing, messaging,
+and caching are still roadmap items. The architecture and API examples above
+describe the intended CMS, not completed features.
+
 ### Prerequisites
 
-Depending on the current implementation stage, development may require:
-
-- .NET SDK
-- SQL Server
-- Node.js
-- Angular CLI
-- Docker Desktop
+- .NET 10 SDK (the SDK version policy is in `global.json`)
+- Node.js 24 LTS and npm (Angular CLI is installed locally with the client)
+- Docker Engine/Desktop with Docker Compose, for SQL Server or the full stack
 - Git
 
-Clone the repository:
+### Run the API and frontend
 
-```bash
-git clone <repository-url>
-cd Webforge
-```
-
-Restore .NET dependencies:
+From the repository root:
 
 ```bash
 dotnet restore
-```
-
-Build the solution:
-
-```bash
-dotnet build
-```
-
-Run automated tests:
-
-```bash
-dotnet test
-```
-
-Run the API:
-
-```bash
+dotnet build --no-restore
+dotnet test --no-build
 dotnet run --project src/Webforge.Api
 ```
 
-Once Docker support is available, the complete local environment can be started with:
+The API listens at http://localhost:5080. Try `/api/info`, `/health`, and
+`/openapi/v1.json`. The OpenAPI JSON is available only in Development; a Swagger
+UI is not installed. The API and frontend can start without a database.
+
+In another terminal:
 
 ```bash
-docker compose up --build
+cd client/Webforge-angular
+npm ci
+npm start
 ```
 
-> Setup instructions will be updated as infrastructure components are introduced.
+Open http://localhost:4200. The Angular development proxy forwards `/api`,
+`/health`, and `/openapi` to port 5080. The home page reports the API connection
+status. Run `npm run build` for a production build and `npm test -- --watch=false`
+for frontend tests.
+
+### Start SQL Server and apply migrations
+
+```bash
+cp .env.example .env
+# Edit .env and set MSSQL_SA_PASSWORD to a strong local password.
+docker compose up -d sqlserver
+```
+
+Wait for SQL Server to become healthy (`docker compose ps`). Set the matching
+connection string in your terminal; replace the placeholder with your local password:
+
+```bash
+export ConnectionStrings__Webforge='Server=localhost,1433;Database=Webforge;User Id=sa;Password=<your-local-password>;Encrypt=True;TrustServerCertificate=True'
+dotnet tool restore
+dotnet ef database update --project src/Webforge.Infrastructure --startup-project src/Webforge.Api
+dotnet run --project src/Webforge.Api
+```
+
+The `.env` file is used by Docker Compose only; it is not automatically loaded by
+`dotnet run`. `/health/ready` returns 200 once SQL Server and the migrated schema
+are available, and 503 otherwise. Migrations are applied explicitly, never on API
+startup. The development `sa` account and trusted local certificate settings are
+for local use only.
+
+### Run in Docker
+
+After configuring `.env` and applying the migration above:
+
+```bash
+docker compose up --build -d
+```
+
+The client is at http://localhost:4200 and the API at http://localhost:5080.
+SQL Server data persists in a named volume. `docker compose down` stops the stack
+and preserves data. Redis, RabbitMQ, and worker processing will be introduced
+when their corresponding features are implemented.
+
+### Project notes
+
+- `src/Webforge.Worker` is a host scaffold with no jobs registered yet.
+- API integration tests run in memory and do not require SQL Server; they do not
+  yet cover database persistence.
+- [Architecture notes](docs/architecture/README.md) and
+  [implemented API endpoints](docs/api/README.md) describe the current foundation.
+- Version references: [Angular compatibility](https://angular.dev/reference/versions)
+  and [ASP.NET Core OpenAPI](https://learn.microsoft.com/aspnet/core/fundamentals/openapi/overview?view=aspnetcore-10.0).
 
 ---
 
@@ -561,8 +599,8 @@ docker compose up --build
 
 ### Phase 1 — Core CMS
 
-- [ ] ASP.NET Core Web API
-- [ ] SQL Server / EF Core
+- [x] ASP.NET Core Web API (foundation)
+- [x] SQL Server / EF Core (foundation)
 - [ ] User authentication
 - [ ] Role-based authorization
 - [ ] Posts
@@ -570,22 +608,22 @@ docker compose up --build
 - [ ] Categories
 - [ ] Tags
 - [ ] Draft/publishing workflow
-- [ ] Swagger/OpenAPI
+- [x] OpenAPI document (development)
 
 ### Phase 2 — Engineering Quality
 
-- [ ] Application/domain separation
+- [x] Application/domain separation (foundation)
 - [ ] Validation
 - [ ] Global exception handling
 - [ ] Structured logging
-- [ ] Unit tests
-- [ ] Integration tests
+- [x] Unit tests (foundation)
+- [x] Integration tests (foundation)
 - [ ] Audit logging
 
 ### Phase 3 — Containerization & Infrastructure
 
-- [ ] Docker
-- [ ] Docker Compose
+- [x] Docker (foundation)
+- [x] Docker Compose (foundation)
 - [ ] Redis
 - [ ] RabbitMQ
 - [ ] Background workers
@@ -594,7 +632,7 @@ docker compose up --build
 
 ### Phase 4 — Frontend
 
-- [ ] Angular application
+- [x] Angular application (foundation)
 - [ ] Authentication
 - [ ] Admin dashboard
 - [ ] Content management
