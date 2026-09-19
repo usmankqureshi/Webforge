@@ -1,0 +1,66 @@
+<main class="container py-5">
+  <a routerLink="/" class="brand d-inline-block text-decoration-none mb-4" aria-label="Webforge home">WEBFORGE</a>
+  <header class="mb-4">
+    <p class="text-uppercase text-secondary small fw-semibold">Content workspace</p>
+    <h1 class="display-5 fw-bold">Your posts</h1>
+    <p class="text-secondary">Capture an idea, shape your story, and keep your drafts in one place.</p>
+  </header>
+
+  @if (error()) { <div class="alert alert-danger" role="alert">{{ error() }}</div> }
+  @if (message()) { <div class="alert alert-success" role="status">{{ message() }}</div> }
+
+  @if (deleting(); as post) {
+    <section class="alert alert-warning" aria-labelledby="delete-heading">
+      <h2 id="delete-heading" class="h5">Delete “{{ post.title }}”?</h2>
+      <p>This permanently deletes the post.</p>
+      <button class="btn btn-danger me-2" type="button" [disabled]="busy()" (click)="deletePost()">Confirm delete</button>
+      <button class="btn btn-outline-secondary" type="button" [disabled]="busy()" (click)="deleting.set(null)">Cancel</button>
+    </section>
+  }
+
+  <div class="row g-4 align-items-start">
+    <section class="col-lg-5" aria-labelledby="editor-heading">
+      <form class="card p-4" #postForm="ngForm" (ngSubmit)="save()">
+        <h2 id="editor-heading" class="h4 mb-4">{{ editingId() ? 'Edit post' : 'Create a draft' }}</h2>
+        <fieldset [disabled]="busy() || loading() || deleting() !== null">
+          <label for="title" class="form-label">Title <span class="text-secondary">(required)</span></label>
+          <input id="title" name="title" class="form-control" [(ngModel)]="title" required maxlength="200" #titleInput="ngModel" aria-describedby="title-help">
+          <div id="title-help" class="form-text mb-3">Up to 200 characters.</div>
+          @if (titleInput.touched && !title.trim()) { <p class="text-danger small">Enter a title.</p> }
+          <label for="body" class="form-label">Body</label>
+          <textarea id="body" name="body" class="form-control mb-4" rows="10" [(ngModel)]="body" placeholder="Start your story…"></textarea>
+          <div class="d-flex gap-2">
+            <button class="btn btn-success" type="submit" [disabled]="postForm.invalid || !title.trim()">{{ busy() ? 'Saving…' : editingId() ? 'Save changes' : 'Create draft' }}</button>
+            @if (editingId()) { <button class="btn btn-outline-secondary" type="button" (click)="reset()">Cancel edit</button> }
+          </div>
+        </fieldset>
+      </form>
+    </section>
+    <section class="col-lg-7" aria-labelledby="posts-heading" [attr.aria-busy]="loading()">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 id="posts-heading" class="h4 mb-0">All posts <span class="text-secondary">({{ posts().length }})</span></h2>
+        <button class="btn btn-outline-secondary btn-sm" type="button" (click)="load()" [disabled]="loading() || busy()">Refresh</button>
+      </div>
+      @if (loading()) {
+        <p role="status">Loading posts…</p>
+      } @else {
+        @for (post of posts(); track post.id) {
+          <article class="card p-4 mb-3">
+            <div class="d-flex gap-2 align-items-center text-secondary small mb-2">
+              <span class="badge text-bg-light">{{ post.status }}</span>
+              <time [attr.datetime]="post.createdAt">{{ post.createdAt | date:'mediumDate' }}</time>
+            </div>
+            <h3 class="h5">{{ post.title }}</h3>
+            <p class="post-body text-secondary">{{ post.body || 'No body yet.' }}</p>
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-success btn-sm" type="button" [disabled]="busy() || deleting() !== null" (click)="edit(post)" [attr.aria-label]="'Edit ' + post.title">Edit</button>
+              <button class="btn btn-outline-danger btn-sm" type="button" [disabled]="busy() || deleting() !== null" (click)="deleting.set(post)" [attr.aria-label]="'Delete ' + post.title">Delete</button>
+            </div>
+          </article>
+        } @empty {
+          @if (!error()) { <div class="card p-4 text-secondary">No posts yet. Create your first draft to get started.</div> }
+        }
+      }
+    </section>
+  </div>
+</main>

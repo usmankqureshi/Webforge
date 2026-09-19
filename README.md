@@ -690,3 +690,24 @@ The project combines established enterprise application development concepts wit
 ## License
 
 This project is available under the terms specified in the repository's `LICENSE` file.
+
+## Post management
+
+The Angular landing page links to `/posts`, which lists posts and provides a form for creating drafts and editing
+existing titles and bodies. Deletion requires confirmation. Run the API and Angular
+client using the setup instructions above; the existing SQL Server database and
+`InitialCreate` migration are required. No additional migration is needed.
+
+| Method | Endpoint | Behavior |
+| --- | --- | --- |
+| GET | `/api/posts` | List posts, newest first |
+| GET | `/api/posts/{id}` | Retrieve a post |
+| POST | `/api/posts` | Create a draft (201 with a Location header) |
+| PUT | `/api/posts/{id}` | Update title and body |
+| DELETE | `/api/posts/{id}` | Delete a post (204) |
+
+POST and PUT accept JSON such as `{"title":"My first post","body":"Hello world"}`.
+Titles are trimmed, required, and limited to 200 characters. Body may be empty but
+must not be null. Invalid content returns a 400 validation problem; missing posts
+return 404. Responses include `id`, `title`, `body`, `status`, and `createdAt`.
+Editing preserves the post's status and creation time.

@@ -1,15 +1,1 @@
-<main class="container py-5">
-  <div class="brand mb-5">WEBFORGE</div>
-  <section class="card shadow-sm p-4 p-md-5">
-    <p class="text-uppercase text-secondary small fw-semibold">Content management platform</p>
-    <h1 class="display-5 fw-bold">A foundation for your next story.</h1>
-    <p class="lead text-secondary mt-3">The workspace is ready. Content management and publishing tools are coming next.</p>
-    <div class="alert mt-4" [class.alert-success]="connected()" [class.alert-warning]="!connected()" role="status">
-      {{ status() }}
-    </div>
-    <nav class="d-flex gap-4 mt-3" aria-label="Development resources">
-      <a href="/openapi/v1.json">API specification</a>
-      <a href="/health/ready">Database readiness</a>
-    </nav>
-  </section>
-</main>
+<router-outlet />

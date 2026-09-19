@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Webforge.Api.Posts;
 using Webforge.Application;
 using Webforge.Infrastructure;
 using Webforge.Infrastructure.Persistence;
@@ -26,6 +27,7 @@ app.MapGet("/health/ready", async (IServiceProvider services, CancellationToken 
         return Results.Problem(statusCode: 503, title: "Database is not ready");
     }
 }).ExcludeFromDescription();
+app.MapPostEndpoints();
 app.Run();
 
 public partial class Program { }

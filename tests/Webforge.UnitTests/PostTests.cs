@@ -22,4 +22,28 @@ public class PostTests
     [Fact]
     public void TitleCannotExceedDatabaseLimit() =>
         Assert.Throws<ArgumentException>(() => Post.CreateDraft(new string('a', 201), "Body"));
+    [Fact]
+    public void UpdateChangesContentAndPreservesIdentityAndCreationTime()
+    {
+        var post = Post.CreateDraft("Original", "Body");
+        var id = post.Id;
+        var createdAt = post.CreatedAt;
+        post.Update("  Revised  ", "New body");
+        Assert.Equal("Revised", post.Title);
+        Assert.Equal("New body", post.Body);
+        Assert.Equal(id, post.Id);
+        Assert.Equal(createdAt, post.CreatedAt);
+        Assert.Equal(PostStatus.Draft, post.Status);
+    }
+
+    [Fact]
+    public void InvalidUpdateDoesNotPartiallyChangePost()
+    {
+        var post = Post.CreateDraft("Original", "Body");
+        Assert.Throws<ArgumentException>(() => post.Update(" ", "Changed"));
+        Assert.Throws<ArgumentException>(() => post.Update(new string('a', 201), "Changed"));
+        Assert.Throws<ArgumentNullException>(() => post.Update("Changed", null!));
+        Assert.Equal("Original", post.Title);
+        Assert.Equal("Body", post.Body);
+    }
 }
