@@ -3,3 +3,5 @@
 .card { border: 1px solid #dce5df; border-radius: 1rem; }
 .post-body { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 15rem; overflow-y: auto; }
 h3 { overflow-wrap: anywhere; }
+
+.thumbnail { width: 100%; max-height: 220px; object-fit: contain; border-radius: .5rem; }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Webforge.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using Webforge.Infrastructure.Persistence;
 namespace Webforge.Infrastructure.Migrations
 {
     [DbContext(typeof(WebforgeDbContext))]
-    partial class WebforgeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260919223000_AddPostThumbnail")]
+    partial class AddPostThumbnail
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

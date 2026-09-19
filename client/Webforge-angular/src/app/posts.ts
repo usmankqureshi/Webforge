@@ -10,6 +10,7 @@ interface Post {
   body: string;
   status: string;
   createdAt: string;
+  thumbnail?: string | null;
 }
 
 @Component({
@@ -27,6 +28,8 @@ export class Posts implements OnInit {
   readonly message = signal('');
   readonly editingId = signal<string | null>(null);
   readonly deleting = signal<Post | null>(null);
+  readonly thumbnail = signal<string | null>(null);
+  readonly readingImage = signal(false);
   title = '';
   body = '';
 
@@ -48,6 +51,7 @@ export class Posts implements OnInit {
     this.editingId.set(post.id);
     this.title = post.title;
     this.body = post.body;
+    this.thumbnail.set(post.thumbnail ?? null);
     this.message.set('');
     this.error.set('');
   }
@@ -56,15 +60,39 @@ export class Posts implements OnInit {
     this.editingId.set(null);
     this.title = '';
     this.body = '';
+    this.thumbnail.set(null);
+  }
+
+  selectThumbnail(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 1024 * 1024) {
+      this.error.set('Choose a PNG, JPEG, or WebP image up to 1 MB.');
+      return;
+    }
+    this.error.set('');
+    this.readingImage.set(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.thumbnail.set(reader.result as string);
+      this.readingImage.set(false);
+    };
+    reader.onerror = () => {
+      this.error.set('Could not read the image. Please try again.');
+      this.readingImage.set(false);
+    };
+    reader.readAsDataURL(file);
   }
 
   save(): void {
-    if (this.busy() || !this.title.trim() || this.title.trim().length > 200) return;
+    if (this.busy() || this.readingImage() || !this.title.trim() || this.title.trim().length > 200) return;
     this.busy.set(true);
     this.error.set('');
     this.message.set('');
     const id = this.editingId();
-    const payload = { title: this.title.trim(), body: this.body };
+    const payload = { title: this.title.trim(), body: this.body, thumbnail: this.thumbnail() };
     const request = id
       ? this.http.put<Post>(`/api/posts/${id}`, payload)
       : this.http.post<Post>('/api/posts', payload);

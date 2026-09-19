@@ -696,7 +696,7 @@ This project is available under the terms specified in the repository's `LICENSE
 The Angular landing page links to `/posts`, which lists posts and provides a form for creating drafts and editing
 existing titles and bodies. Deletion requires confirmation. Run the API and Angular
 client using the setup instructions above; the existing SQL Server database and
-`InitialCreate` migration are required. No additional migration is needed.
+`InitialCreate` migration are required. Apply all pending migrations before running the API.
 
 | Method | Endpoint | Behavior |
 | --- | --- | --- |
@@ -711,3 +711,19 @@ Titles are trimmed, required, and limited to 200 characters. Body may be empty b
 must not be null. Invalid content returns a 400 validation problem; missing posts
 return 404. Responses include `id`, `title`, `body`, `status`, and `createdAt`.
 Editing preserves the post's status and creation time.
+
+### Post thumbnails
+
+POST and PUT accept an optional `thumbnail` containing a base64 data URL, for example
+`data:image/png;base64,...`. PNG, JPEG, and WebP files up to 1 MB are supported;
+unsupported types, invalid base64, mismatched signatures, and oversized files return 400.
+The frontend image picker handles encoding and displays a preview. Sending null or
+omitting `thumbnail` removes the thumbnail on PUT. GET responses include the thumbnail.
+Images are stored in SQL Server with the post and deleted along with it.
+
+Apply the new nullable thumbnail column before using this feature:
+
+```sh
+dotnet tool restore
+dotnet ef database update --project src/Webforge.Infrastructure --startup-project src/Webforge.Api
+```

@@ -41,7 +41,7 @@ describe('Post workspace', () => {
     app.save();
     const create = http.expectOne('/api/posts');
     expect(create.request.method).toBe('POST');
-    expect(create.request.body).toEqual({ title: 'First story', body: 'Hello' });
+    expect(create.request.body).toEqual({ title: 'First story', body: 'Hello', thumbnail: null });
     create.flush(post);
     expect(app.posts()).toEqual([post]);
     expect(app.title).toBe('');
@@ -89,5 +89,26 @@ describe('Post workspace', () => {
     fixture.componentInstance.load();
     http.expectOne('/api/posts').flush([]);
     expect(fixture.componentInstance.error()).toBe('');
+  });
+  it('loads an existing thumbnail and sends its removal on update', () => {
+    const { app, http } = setup();
+    app.edit({ ...post, thumbnail: 'data:image/png;base64,example' });
+    expect(app.thumbnail()).toBe('data:image/png;base64,example');
+    app.thumbnail.set(null);
+    app.save();
+    const request = http.expectOne('/api/posts/post-1');
+    expect(request.request.body.thumbnail).toBeNull();
+    request.flush({ ...post, thumbnail: null });
+    expect(app.thumbnail()).toBeNull();
+  });
+
+  it('rejects unsupported files without discarding the current thumbnail', () => {
+    const { app } = setup();
+    app.thumbnail.set('existing-image');
+    const input = { files: [new File(['<svg/>'], 'image.svg', { type: 'image/svg+xml' })], value: 'image.svg' };
+    app.selectThumbnail({ target: input } as unknown as Event);
+    expect(app.error()).toContain('PNG, JPEG, or WebP');
+    expect(app.thumbnail()).toBe('existing-image');
+    expect(app.readingImage()).toBe(false);
   });
 });

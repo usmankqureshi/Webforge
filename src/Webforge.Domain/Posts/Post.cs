@@ -9,18 +9,22 @@ public sealed class Post
     public Guid Id { get; private set; }
     public string Title { get; private set; } = string.Empty;
     public string Body { get; private set; } = string.Empty;
+    public string? Thumbnail { get; private set; }
     public PostStatus Status { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
 
-    public void Update(string title, string body)
+    public void Update(string title, string body, string? thumbnail = null)
     {
-        Validate(title, body);
+        Validate(title, body, thumbnail);
         Title = title.Trim();
         Body = body;
+        Thumbnail = thumbnail;
     }
 
-    private static void Validate(string title, string body)
+    private static void Validate(string title, string body, string? thumbnail = null)
     {
+        if (!PostThumbnail.IsValid(thumbnail))
+            throw new ArgumentException(PostThumbnail.ValidationMessage, nameof(thumbnail));
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
         ArgumentNullException.ThrowIfNull(body);
         if (title.Trim().Length > 200)
@@ -28,12 +32,12 @@ public sealed class Post
 
     }
 
-    public static Post CreateDraft(string title, string body)
+    public static Post CreateDraft(string title, string body, string? thumbnail = null)
     {
-        Validate(title, body);
+        Validate(title, body, thumbnail);
         return new Post
         {
-            Id = Guid.NewGuid(), Title = title.Trim(), Body = body,
+            Id = Guid.NewGuid(), Title = title.Trim(), Body = body, Thumbnail = thumbnail,
             Status = PostStatus.Draft, CreatedAt = DateTimeOffset.UtcNow
         };
     }

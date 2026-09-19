@@ -21,7 +21,7 @@ public static class PostEndpoints
         {
             var errors = Validate(request);
             if (errors.Count > 0) return Results.ValidationProblem(errors);
-            var post = Post.CreateDraft(request.Title!, request.Body!);
+            var post = Post.CreateDraft(request.Title!, request.Body!, request.Thumbnail);
             db.Posts.Add(post);
             await db.SaveChangesAsync(ct);
             return Results.Created($"/api/posts/{post.Id}", PostResponse.From(post));
@@ -33,7 +33,7 @@ public static class PostEndpoints
             if (errors.Count > 0) return Results.ValidationProblem(errors);
             var post = await db.Posts.SingleOrDefaultAsync(p => p.Id == id, ct);
             if (post is null) return Results.NotFound();
-            post.Update(request.Title!, request.Body!);
+            post.Update(request.Title!, request.Body!, request.Thumbnail);
             await db.SaveChangesAsync(ct);
             return Results.Ok(PostResponse.From(post));
         });
@@ -54,12 +54,13 @@ public static class PostEndpoints
         if (string.IsNullOrWhiteSpace(request.Title)) errors["title"] = ["Title is required."];
         else if (request.Title.Trim().Length > 200) errors["title"] = ["Title cannot exceed 200 characters."];
         if (request.Body is null) errors["body"] = ["Body must not be null. An empty body is allowed."];
+        if (!PostThumbnail.IsValid(request.Thumbnail)) errors["thumbnail"] = [PostThumbnail.ValidationMessage];
         return errors;
     }
 }
 
-public sealed record SavePostRequest(string? Title, string? Body);
-public sealed record PostResponse(Guid Id, string Title, string Body, string Status, DateTimeOffset CreatedAt)
+public sealed record SavePostRequest(string? Title, string? Body, string? Thumbnail = null);
+public sealed record PostResponse(Guid Id, string Title, string Body, string Status, DateTimeOffset CreatedAt, string? Thumbnail = null)
 {
-    public static PostResponse From(Post post) => new(post.Id, post.Title, post.Body, post.Status.ToString(), post.CreatedAt);
+    public static PostResponse From(Post post) => new(post.Id, post.Title, post.Body, post.Status.ToString(), post.CreatedAt, post.Thumbnail);
 }
