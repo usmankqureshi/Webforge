@@ -18,7 +18,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: src/Webforge.Api/Dockerfile
+      dockerfile: WebforgeBackendApplication/Webforge.Api/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_HTTP_PORTS: "8080"
@@ -29,7 +29,7 @@ services:
       sqlserver:
         condition: service_healthy
   client:
-    build: client/Webforge-angular
+    build: WebforgeFrontendClients/Angular
     ports:
       - "127.0.0.1:4200:80"
     depends_on:

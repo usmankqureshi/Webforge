@@ -18,5 +18,5 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
-  <ItemGroup><ProjectReference Include="../../src/Webforge.Domain/Webforge.Domain.csproj" /></ItemGroup>
+  <ItemGroup><ProjectReference Include="../../WebforgeBackendApplication/Webforge.Domain/Webforge.Domain.csproj" /></ItemGroup>
 </Project>

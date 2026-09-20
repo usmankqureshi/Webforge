@@ -3,23 +3,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebforgeBackendApplication", "WebforgeBackendApplication", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Webforge.Api", "src\Webforge.Api\Webforge.Api.csproj", "{5EE9968E-D101-45D2-85EB-6FC19DAB7740}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Webforge.Api", "WebforgeBackendApplication\Webforge.Api\Webforge.Api.csproj", "{5EE9968E-D101-45D2-85EB-6FC19DAB7740}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Webforge.Application", "src\Webforge.Application\Webforge.Application.csproj", "{F89E8FEB-4EB3-41B7-9DE5-38ED8D3E5D55}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Webforge.Application", "WebforgeBackendApplication\Webforge.Application\Webforge.Application.csproj", "{F89E8FEB-4EB3-41B7-9DE5-38ED8D3E5D55}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Webforge.Domain", "src\Webforge.Domain\Webforge.Domain.csproj", "{A76ADD1F-BA1B-4673-8644-DE61B9F563D5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Webforge.Domain", "WebforgeBackendApplication\Webforge.Domain\Webforge.Domain.csproj", "{A76ADD1F-BA1B-4673-8644-DE61B9F563D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Webforge.Infrastructure", "src\Webforge.Infrastructure\Webforge.Infrastructure.csproj", "{E3DC050E-DE0A-4FD2-A782-5AD9E6CE854A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Webforge.Infrastructure", "WebforgeBackendApplication\Webforge.Infrastructure\Webforge.Infrastructure.csproj", "{E3DC050E-DE0A-4FD2-A782-5AD9E6CE854A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Webforge.Worker", "src\Webforge.Worker\Webforge.Worker.csproj", "{F6FF876F-5A06-4FD7-9152-4B7AEE0138D9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Webforge.Worker", "WebforgeBackendApplication\Webforge.Worker\Webforge.Worker.csproj", "{F6FF876F-5A06-4FD7-9152-4B7AEE0138D9}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebforgeTesting", "WebforgeTesting", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Webforge.IntegrationTests", "tests\Webforge.IntegrationTests\Webforge.IntegrationTests.csproj", "{7B20517C-9BCE-437F-9304-B7BEADA8DF02}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Webforge.IntegrationTests", "WebforgeTesting\Webforge.IntegrationTests\Webforge.IntegrationTests.csproj", "{7B20517C-9BCE-437F-9304-B7BEADA8DF02}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Webforge.UnitTests", "tests\Webforge.UnitTests\Webforge.UnitTests.csproj", "{FACD7D61-6DCD-4ED2-8827-ACE2CDBFEFD0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Webforge.UnitTests", "WebforgeTesting\Webforge.UnitTests\Webforge.UnitTests.csproj", "{FACD7D61-6DCD-4ED2-8827-ACE2CDBFEFD0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

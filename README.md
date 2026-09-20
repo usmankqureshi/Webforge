@@ -105,17 +105,17 @@ Supporting processes such as notifications and asynchronous content processing c
 ```text
 Webforge/
 |
-+-- src/
++-- WebforgeBackendApplication/
 |   +-- Webforge.Api/
 |   +-- Webforge.Application/
 |   +-- Webforge.Domain/
 |   +-- Webforge.Infrastructure/
 |   +-- Webforge.Worker/
 |
-+-- client/
-|   +-- Webforge-angular/
++-- WebforgeFrontendClients/
+|   +-- Angular/
 |
-+-- tests/
++-- WebforgeTesting/
 |   +-- Webforge.UnitTests/
 |   +-- Webforge.IntegrationTests/
 |
@@ -526,7 +526,7 @@ From the repository root:
 dotnet restore
 dotnet build --no-restore
 dotnet test --no-build
-dotnet run --project src/Webforge.Api
+dotnet run --project WebforgeBackendApplication/Webforge.Api
 ```
 
 The API listens at http://localhost:5080. Try `/api/info`, `/health`, and
@@ -536,7 +536,7 @@ UI is not installed. The API and frontend can start without a database.
 In another terminal:
 
 ```bash
-cd client/Webforge-angular
+cd WebforgeFrontendClients/Angular
 npm ci
 npm start
 ```
@@ -560,8 +560,8 @@ connection string in your terminal; replace the placeholder with your local pass
 ```bash
 export ConnectionStrings__Webforge='Server=localhost,1433;Database=Webforge;User Id=sa;Password=<your-local-password>;Encrypt=True;TrustServerCertificate=True'
 dotnet tool restore
-dotnet ef database update --project src/Webforge.Infrastructure --startup-project src/Webforge.Api
-dotnet run --project src/Webforge.Api
+dotnet ef database update --project WebforgeBackendApplication/Webforge.Infrastructure --startup-project WebforgeBackendApplication/Webforge.Api
+dotnet run --project WebforgeBackendApplication/Webforge.Api
 ```
 
 The `.env` file is used by Docker Compose only; it is not automatically loaded by
@@ -585,7 +585,7 @@ when their corresponding features are implemented.
 
 ### Project notes
 
-- `src/Webforge.Worker` is a host scaffold with no jobs registered yet.
+- `WebforgeBackendApplication/Webforge.Worker` is a host scaffold with no jobs registered yet.
 - API integration tests run in memory and do not require SQL Server; they do not
   yet cover database persistence.
 - [Architecture notes](docs/architecture/README.md) and
@@ -725,5 +725,5 @@ Apply the new nullable thumbnail column before using this feature:
 
 ```sh
 dotnet tool restore
-dotnet ef database update --project src/Webforge.Infrastructure --startup-project src/Webforge.Api
+dotnet ef database update --project WebforgeBackendApplication/Webforge.Infrastructure --startup-project WebforgeBackendApplication/Webforge.Api
 ```
