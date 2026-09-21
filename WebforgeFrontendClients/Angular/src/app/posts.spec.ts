@@ -3,6 +3,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Posts } from './posts';
 import { provideRouter } from '@angular/router';
+import { By } from '@angular/platform-browser';
+import { RichText } from './rich-text';
 
 const post = { id: 'post-1', title: 'First story', body: 'Hello', status: 'Draft', createdAt: '2026-09-19T12:00:00Z' };
 
@@ -111,4 +113,32 @@ describe('Post workspace', () => {
     expect(app.thumbnail()).toBe('existing-image');
     expect(app.readingImage()).toBe(false);
   });
+  it('renders formatted bodies while sanitizing untrusted HTML', () => {
+    const { fixture } = setup([{ ...post, body: '<p><strong>Bold story</strong><img src="x" onerror="alert(1)"><a href="javascript:alert(1)">Bad link</a></p>' }]);
+    const body = fixture.nativeElement.querySelector('.post-body');
+    expect(body.querySelector('strong').textContent).toBe('Bold story');
+    expect(body.innerHTML).not.toContain('onerror');
+    expect(body.querySelector('a').getAttribute('href')).not.toBe('javascript:alert(1)');
+  });
+
+  it('saves editor HTML, resets after saving, and reloads formatting for editing', () => {
+    const { fixture, app, http } = setup([]);
+    const editor = fixture.debugElement.query(By.directive(RichText)).componentInstance as RichText;
+    app.title = 'Formatted story';
+    editor.editor!.chain().toggleBold().insertContent('Rich content').run();
+    fixture.detectChanges();
+    expect(editor.canUndo()).toBe(true);
+    app.save();
+    const request = http.expectOne('/api/posts');
+    expect(request.request.body.body).toBe('<p><strong>Rich content</strong></p>');
+    const saved = { ...post, title: app.title, body: request.request.body.body };
+    request.flush(saved);
+    fixture.detectChanges();
+    expect(editor.editor!.isEmpty).toBe(true);
+    app.edit(saved);
+    fixture.detectChanges();
+    expect(editor.editor!.getHTML()).toBe(saved.body);
+    expect(editor.canUndo()).toBe(false);
+  });
+
 });

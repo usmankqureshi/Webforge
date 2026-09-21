@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { RichText, bodyHtml } from './rich-text';
 
 interface Post {
   id: string;
@@ -15,7 +16,7 @@ interface Post {
 
 @Component({
   selector: 'app-posts',
-  imports: [FormsModule, DatePipe, RouterLink],
+  imports: [FormsModule, DatePipe, RouterLink, RichText],
   templateUrl: './posts.html',
   styleUrl: './app.scss',
 })
@@ -32,6 +33,7 @@ export class Posts implements OnInit {
   readonly readingImage = signal(false);
   title = '';
   body = '';
+  readonly bodyHtml = bodyHtml;
 
   ngOnInit(): void { this.load(); }
 

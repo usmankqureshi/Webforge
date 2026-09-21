@@ -27,8 +27,8 @@
           <input id="title" name="title" class="form-control" [(ngModel)]="title" required maxlength="200" #titleInput="ngModel" aria-describedby="title-help">
           <div id="title-help" class="form-text mb-3">Up to 200 characters.</div>
           @if (titleInput.touched && !title.trim()) { <p class="text-danger small">Enter a title.</p> }
-          <label for="body" class="form-label">Body</label>
-          <textarea id="body" name="body" class="form-control mb-4" rows="10" [(ngModel)]="body" placeholder="Start your story…"></textarea>
+          <div class="form-label">Body</div>
+          <app-rich-text [(value)]="body" [documentKey]="editingId()" [disabled]="busy() || readingImage() || loading() || deleting() !== null" />
           <label for="thumbnail" class="form-label">Thumbnail (optional)</label>
           <input id="thumbnail" type="file" class="form-control" accept="image/png,image/jpeg,image/webp" (change)="selectThumbnail($event)" aria-describedby="thumbnail-help">
           <p id="thumbnail-help" class="form-text">PNG, JPEG, or WebP, up to 1 MB.</p>
@@ -59,7 +59,7 @@
             </div>
             @if (post.thumbnail) { <img [src]="post.thumbnail" alt="" class="thumbnail mb-3" loading="lazy"> }
             <h3 class="h5">{{ post.title }}</h3>
-            <p class="post-body text-secondary">{{ post.body || 'No body yet.' }}</p>
+            <div class="post-body text-secondary" [innerHTML]="bodyHtml(post.body || 'No body yet.')"></div>
             <div class="d-flex gap-2">
               <button class="btn btn-outline-success btn-sm" type="button" [disabled]="busy() || readingImage() || deleting() !== null" (click)="edit(post)" [attr.aria-label]="'Edit ' + post.title">Edit</button>
               <button class="btn btn-outline-danger btn-sm" type="button" [disabled]="busy() || readingImage() || deleting() !== null" (click)="deleting.set(post)" [attr.aria-label]="'Delete ' + post.title">Delete</button>

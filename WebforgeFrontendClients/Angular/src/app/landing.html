@@ -15,4 +15,26 @@
       <a href="/health/ready">Database readiness</a>
     </nav>
   </section>
+  <section class="mt-5" aria-labelledby="home-posts-heading" [attr.aria-busy]="loadingPosts()">
+    <h2 id="home-posts-heading" class="h3 mb-4">All posts</h2>
+    @if (loadingPosts()) {
+      <p role="status">Loading posts…</p>
+    } @else if (postsError()) {
+      <div class="alert alert-danger" role="alert">
+        {{ postsError() }}
+        <button type="button" class="btn btn-outline-danger btn-sm ms-2" (click)="loadPosts()">Retry</button>
+      </div>
+    } @else {
+      <ul class="list-unstyled">
+        @for (post of posts(); track post.id) {
+          <li class="card p-4 mb-3">
+            <h3 class="h4 mb-2"><a [routerLink]="['/posts', post.id]" class="link-success">{{ post.title }}</a></h3>
+            <time class="text-secondary small" [attr.datetime]="post.createdAt">{{ post.createdAt | date:'longDate' }}</time>
+          </li>
+        } @empty {
+          <li class="text-secondary">No posts yet.</li>
+        }
+      </ul>
+    }
+  </section>
 </main>
