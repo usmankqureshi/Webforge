@@ -1,49 +1,66 @@
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { FormsModule } from '@angular/forms';
+import { EditorComponent } from '@tinymce/tinymce-angular';
 import { RichText, bodyHtml } from './rich-text';
 
-describe('Rich text body editor', () => {
+// Exercise our Angular binding without loading an iframe editor in jsdom.
+@Component({ selector: 'editor', template: '' })
+class EditorStub {
+  @Input() licenseKey = '';
+  @Input() init: unknown;
+  @Input() disabled = false;
+  @Input() ngModel = '';
+  @Input() ngModelOptions: unknown;
+  @Output() ngModelChange = new EventEmitter<string>();
+}
+
+describe('TinyMCE body integration', () => {
+  beforeEach(() => {
+    TestBed.overrideComponent(RichText, {
+      remove: { imports: [EditorComponent, FormsModule] },
+      add: { imports: [EditorStub] },
+    });
+  });
+
   function setup(value = '') {
     const fixture = TestBed.createComponent(RichText);
     fixture.componentRef.setInput('value', value);
     fixture.detectChanges();
-    return { fixture, component: fixture.componentInstance };
+    const editor = () => fixture.debugElement.query(By.directive(EditorStub)).componentInstance as EditorStub;
+    return { fixture, component: fixture.componentInstance, editor };
   }
 
-  it('preserves literal plain text and newlines', () => {
-    const { component } = setup('First <idea> & thought\nSecond line');
-    expect(component.editor!.getHTML()).toBe('<p>First &lt;idea&gt; &amp; thought</p><p>Second line</p>');
+  it('loads formatted content and preserves literal plain text', () => {
+    const { fixture, editor } = setup('First <idea> & thought\nSecond line');
+    expect(editor().ngModel).toBe('<p>First &lt;idea&gt; &amp; thought</p><p>Second line</p>');
+    fixture.componentRef.setInput('value', '<p><strong>Bold</strong></p>');
+    fixture.detectChanges();
+    expect(editor().ngModel).toBe('<p><strong>Bold</strong></p>');
     expect(bodyHtml('1 < 2')).toBe('<p>1 &lt; 2</p>');
   });
 
-  it('emits formatted HTML and updates counts', () => {
-    const { component } = setup();
+  it('passes editor HTML and cleared content to the post form', () => {
+    const { component, editor } = setup();
     const changes: string[] = [];
     component.valueChange.subscribe(value => changes.push(value));
-    component.editor!.chain().toggleBold().insertContent('Hello world').run();
-    expect(changes.at(-1)).toBe('<p><strong>Hello world</strong></p>');
-    expect(component.words()).toBe(2);
-    expect(component.characters()).toBe(11);
+    editor().ngModelChange.emit('<p><strong>Hello world</strong></p>');
+    editor().ngModelChange.emit('');
+    expect(changes).toEqual(['<p><strong>Hello world</strong></p>', '']);
   });
 
-  it('clears history when switching posts and respects disabled state', () => {
-    const { fixture, component } = setup('First');
-    component.editor!.commands.insertContent('Changed');
-    expect(component.canUndo()).toBe(true);
+  it('recreates the editor when switching posts and respects disabled state', () => {
+    const { fixture, editor } = setup('First');
+    fixture.componentRef.setInput('documentKey', 'first');
+    fixture.detectChanges();
+    const first = editor();
     fixture.componentRef.setInput('value', '<p>Second</p>');
     fixture.componentRef.setInput('documentKey', 'second');
-    fixture.detectChanges();
-    expect(component.editor!.getText()).toBe('Second');
-    expect(component.canUndo()).toBe(false);
     fixture.componentRef.setInput('disabled', true);
     fixture.detectChanges();
-    expect(component.editor!.isEditable).toBe(false);
-  });
-
-  it('rejects unsafe link URLs', () => {
-    const { component } = setup('Link text');
-    component.linkUrl = 'javascript:alert(1)';
-    component.applyLink();
-    expect(component.linkError).toContain('valid');
-    expect(component.editor!.getHTML()).not.toContain('href');
+    expect(editor()).not.toBe(first);
+    expect(editor().ngModel).toBe('<p>Second</p>');
+    expect(editor().disabled).toBe(true);
   });
 });

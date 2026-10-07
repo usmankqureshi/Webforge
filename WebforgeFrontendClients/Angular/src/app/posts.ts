@@ -16,10 +16,7 @@ export class Posts implements OnInit {
   private readonly http = inject(HttpClient);
   readonly posts = signal<Post[]>([]);
   readonly loading = signal(false);
-  readonly busy = signal(false);
   readonly error = signal('');
-  readonly message = signal('');
-  readonly deleting = signal<Post | null>(null);
   private readonly document = inject(DOCUMENT);
 
   excerpt(body: string): string {
@@ -46,23 +43,4 @@ export class Posts implements OnInit {
     });
   }
 
-  deletePost(): void {
-    const post = this.deleting();
-    if (!post || this.busy()) return;
-    this.busy.set(true);
-    this.error.set('');
-    this.message.set('');
-    this.http.delete<void>(`/api/posts/${post.id}`).subscribe({
-      next: () => {
-        this.posts.update(posts => posts.filter(p => p.id !== post.id));
-        this.deleting.set(null);
-        this.busy.set(false);
-        this.message.set('Post deleted.');
-      },
-      error: () => {
-        this.busy.set(false);
-        this.error.set('Could not delete the post. Please try again.');
-      },
-    });
-  }
 }

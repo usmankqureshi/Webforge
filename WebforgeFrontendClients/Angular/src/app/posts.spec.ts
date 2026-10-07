@@ -4,6 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { Posts } from './posts';
+import { PostDetail } from './post-detail';
 import { PostEditor } from './post-editor';
 import { routes } from './app.routes';
 
@@ -15,7 +16,7 @@ describe('Post pages', () => {
   }));
   afterEach(() => TestBed.inject(HttpTestingController).verify());
 
-  it('lists excerpts and links to separate pages, with confirmed deletion', async () => {
+  it('lists linked titles, dates and Read More without management actions', async () => {
     const harness = await RouterTestingHarness.create();
     const app = await harness.navigateByUrl('/posts', Posts);
     const http = TestBed.inject(HttpTestingController);
@@ -24,21 +25,45 @@ describe('Post pages', () => {
     const page = harness.routeNativeElement!;
     expect(page.querySelector('form')).toBeNull();
     expect(page.querySelector('a[href="/posts/new"]')).not.toBeNull();
-    expect(page.querySelector('a[href="/posts/post-1/edit"]')).not.toBeNull();
+    expect(page.querySelector('a[href="/posts/post-1/edit"]')).toBeNull();
+    expect(page.querySelector('[aria-label="Delete First story"]')).toBeNull();
+    expect(page.querySelector('h3 a')!.getAttribute('href')).toBe('/posts/post-1');
+    expect(page.querySelector('article')!.firstElementChild!.tagName).toBe('H3');
+    expect(page.querySelector('h3')!.nextElementSibling!.querySelector('time')).not.toBeNull();
+    expect(page.querySelector('p a[href="/posts/post-1"]')!.textContent).toBe('Read More');
     expect(page.querySelector('time')!.getAttribute('datetime')).toBe(post.createdAt);
     expect(page.querySelector('img')!.getAttribute('src')).toBe(post.thumbnail);
     expect(page.textContent).toContain('Hello world');
     expect(app.excerpt('<p>' + 'a'.repeat(250) + '</p>')).toBe('a'.repeat(200) + '…');
     expect(app.excerpt('<p>First</p><p>Second &amp; third</p>')).toBe('First Second & third');
     expect(app.excerpt('<p>Hello</p><script>alert(1)</script>')).toBe('Hello');
+  });
+
+  it('shows complete details and manages deletion with retry and confirmation', async () => {
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/posts/post-1', PostDetail);
+    const http = TestBed.inject(HttpTestingController);
+    http.expectOne('/api/posts/post-1').flush(post);
+    harness.detectChanges();
+    const page = harness.routeNativeElement!;
+    expect(page.querySelector('.post-detail-body strong')!.textContent).toBe('world');
+    expect(page.querySelector('a[href="/posts/post-1/edit"]')).not.toBeNull();
     page.querySelector<HTMLButtonElement>('[aria-label="Delete First story"]')!.click();
     http.expectNone('/api/posts/post-1');
     harness.detectChanges();
     page.querySelector<HTMLButtonElement>('.btn-danger')!.click();
-    const request = http.expectOne('/api/posts/post-1');
-    expect(request.request.method).toBe('DELETE');
-    request.flush(null);
-    expect(app.posts()).toEqual([]);
+    const failed = http.expectOne('/api/posts/post-1');
+    expect(failed.request.method).toBe('DELETE');
+    failed.flush(null, { status: 503, statusText: 'Unavailable' });
+    harness.detectChanges();
+    expect(page.textContent).toContain('Could not delete');
+    expect(page.querySelector('h1')!.textContent).toBe(post.title);
+    page.querySelector<HTMLButtonElement>('.btn-danger')!.click();
+    http.expectOne('/api/posts/post-1').flush(null);
+    await harness.fixture.whenStable();
+    http.expectOne('/api/posts').flush([]);
+    harness.detectChanges();
+    expect(harness.routeNativeElement!.textContent).toContain('Your posts');
   });
 
   it('creates a post and returns to the list', async () => {
